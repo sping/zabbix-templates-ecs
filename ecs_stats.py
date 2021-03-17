@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import datetime
 import sys
 from optparse import OptionParser
@@ -20,7 +20,7 @@ parser.add_option("-m", "--metric", dest="metric",
 parser.add_option("-r", "--region", dest="region", default="us-east-1",
                 help="ECS region")
 parser.add_option("-d", "--discover",action="store_true", dest="discover", default=False,
-		help="Discover services in a cluster (boolean)")
+                help="Discover services in a cluster (boolean)")
 
 (options, args) = parser.parse_args()
 
@@ -56,10 +56,10 @@ if options.metric in metrics.keys() and not options.discover:
     vh = metrics[options.metric]
 
     try:
-	dims = []
-	dims.append({'Name': "ClusterName", 'Value': options.cluster_name})
-	if options.service_name:
-		dims.append({'Name': "ServiceName", 'Value': options.service_name})
+        dims = []
+        dims.append({'Name': "ClusterName", 'Value': options.cluster_name})
+        if options.service_name:
+            dims.append({'Name': "ServiceName", 'Value': options.service_name})
         res = conn.get_metric_statistics(Namespace="AWS/ECS", MetricName=k, Dimensions=dims, StartTime=start, EndTime=end, Period=60, Statistics=["Average"])
     except Exception as e:
         print("status err Error running ecs_stats: %s" % e)
@@ -82,15 +82,16 @@ elif options.discover:
     try:
         response = conn.list_metrics(Dimensions=[{'Name': "ClusterName", 'Value': options.cluster_name}],MetricName="CPUUtilization",Namespace="AWS/ECS")
 
-	services = []
+        services = []
 
-	for metric in response['Metrics']:
-	    # Filter out the cluster total; we already know about that one.
-	    if len(metric['Dimensions']) > 1:
-		services.append({"{#SERVICE}": metric['Dimensions'][0]['Value']})
+        for metric in response['Metrics']:
+            # Filter out the cluster total; we already know about that one.
+            if len(metric['Dimensions']) > 1:
+                services.append({"{#SERVICE}": metric['Dimensions'][0]['Value']})
 
-	raw = {"data": services}
-	print json.dumps(raw)
+        raw = {"data": services}
+        raw_dump = json.dumps(raw)
+        print(raw_dump)
 
     except Exception as e:
-	print("status err Error running ecs_stats: %s" % e)
+        print("status err Error running ecs_stats: %s" % e)
